@@ -8,10 +8,15 @@ public class Observer : MonoBehaviour
     public GameEnding gameEnding;
 
     bool m_IsPlayerInRange;
+    bool m_IsWall;
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.transform == player)
+        if(other.transform.CompareTag("wall"))
+        {
+            m_IsWall = true;
+        }
+        if (other.transform == player)
         {
             m_IsPlayerInRange = true;
         }
@@ -19,6 +24,10 @@ public class Observer : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
+        if (other.transform.CompareTag("wall"))
+        {
+            m_IsWall = false;
+        }
         if (other.transform == player)
         {
             m_IsPlayerInRange = false;
@@ -33,7 +42,7 @@ public class Observer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(m_IsPlayerInRange)
+        if(m_IsPlayerInRange && !m_IsWall)
         {
             Vector3 direction = player.position - transform.position + Vector3.up;
             Ray ray = new Ray(transform.position, direction);
@@ -41,7 +50,11 @@ public class Observer : MonoBehaviour
 
             if(Physics.Raycast(ray, out raycastHit))
             {
-                if(raycastHit.collider.transform == player)
+                if(raycastHit.collider.transform.tag == "wall")
+                {
+                    m_IsPlayerInRange = false;
+                }
+                else if(raycastHit.collider.transform == player)
                 {
                     gameEnding.CaughtPlayer();
                 }
